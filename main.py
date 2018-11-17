@@ -1,20 +1,23 @@
 import os
-from CorpusPreprocess import Preprocessor
+from CorpusPreprocess import gci
+from CorpusPreprocess import create_data
+from CreateVector import create_word2vec_corpus
+from CreateVector import pretrain_word2vec
 
+RAW_CORPUS = 'E:\\chinese word segmentation\\corpus\\PeopleDaily2014'
+RAW_DATA_DIR = 'raw_data'
+WORD2VEC_DIR = 'word2vec'
+WORD2VEC_FILE = WORD2VEC_DIR + 'word_embedding_300dim.txt'
+TRAIN_FILE = 'data/train.txt'
+VALID_FILE = 'data/valid.txt'
+TEST_FILE = 'data/test.txt'
 
-def gci(path):
-    parents = os.listdir(path)
-    for parent in parents:
-        child = os.path.join(path, parent)
-        if os.path.isdir(child):
-            gci(child)
-        else:
-            if child[-1] != '_':
-                cp = Preprocessor(child)
-                cp.preprocess()
 
 if __name__ == '__main__':
     # process corpus
-    gci('E:\\chinese word segmentation\\corpus\\PeopleDaily2014')
-    # cp = Preprocessor('c231190-20282163.txt')
-    # cp.preprocess()
+    # gci(RAW_CORPUS)
+    # create_data(RAW_DATA_DIR)
+    # train the word vectors
+    create_word2vec_corpus(TRAIN_FILE, "", "", 'word2vec/corpus.txt')
+    pretrain_word2vec('word2vec/corpus.txt')
+
