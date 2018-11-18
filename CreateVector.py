@@ -2,7 +2,7 @@ import numpy as np
 import gensim
 from gensim.models import word2vec
 from gensim.models.word2vec import LineSentence
-
+import GlobalParameter
 
 class Word2vec:
     def __init__(self):
@@ -88,6 +88,6 @@ def pretrain_word2vec(corpus):
     for sentence in sentences:
         all_word_list.append(sentence.split())
     print(len(all_word_list))
-    model = gensim.models.Word2Vec(all_word_list, size=300, min_count=0, sg=1, hs=0, negative=6, iter=15, workers=64,
+    model = gensim.models.Word2Vec(all_word_list, size=GlobalParameter.word_size, min_count=0, sg=1, hs=0, negative=6, iter=15, workers=64,
                                    window=5, seed=6)
     model.wv.save_word2vec_format('word2vec/word_embedding_300dim.txt', binary=False)

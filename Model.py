@@ -4,35 +4,38 @@ from collections import OrderedDict
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from BiLSTM import BiLSTM
-from DataUtils import SegBatcher
+from DataUtils import SegBatcher, load_map_file, load_size_file
+import word2vec
+import GlobalParameter
 
 
 def set_model_config(vocabulary_size, tag_size):
     model_config = OrderedDict()
-    model_config['lstm_hidden_size'] = 100
-    model_config['word_size'] = 100
-    model_config['learninng_rate'] = 0.001
-    model_config['input_dropout_keep'] = 1.0
-    model_config['dropout'] = 0.5
-    model_config['max_epoch'] = 20
-    model_config['batch_size'] = 32
+    model_config['lstm_hidden_size'] = GlobalParameter.lstm_hidden_size
+    model_config['word_size'] = GlobalParameter.word_size
+    model_config['learninng_rate'] = GlobalParameter.learning_rate
+    model_config['input_dropout_keep'] = GlobalParameter.input_dropout_keep
+    model_config['dropout'] = GlobalParameter.dropout
+    model_config['max_epoch'] = GlobalParameter.max_epoch
+    model_config['batch_size'] = GlobalParameter.batch_size
     model_config['optimizer'] = 'adam'
-    model_config['clip'] = 5
-    model_config['eval_step'] = 20
+    model_config['clip'] = GlobalParameter.clip
+    model_config['eval_step'] = GlobalParameter.eval_step
 
     model_config['words_num'] = vocabulary_size
     model_config['tags_num'] = tag_size
 
     return model_config
 
-def Model_train():
-    # TODO: get word2id, tag2id and id2tag
-    word2id, id2word, tag2id, id2tag = [1, 2, 3, 4]
 
-    # TODO：get the value of the 3 variables
-    train_num = 0
-    dev_num = 0
-    test_num = 0
+def Model_train():
+    word2id, tag2id, id2tag = load_map_file(GlobalParameter.MAP_FILE)
+    id2word = {v: k for k, v in word2id}
+
+    size_dict = load_size_file(GlobalParameter.SIZE_FILE)
+    train_num = size_dict['train_num']
+    valid_num = size_dict['valid_num']
+    # test_num = size_dict['test_num']
     model_config = set_model_config(len(word2id), len(tag2id))
     print(model_config)
 
@@ -102,10 +105,7 @@ def Model_train():
                     }
                     global_step, batch_loss, _ = sess.run([model.g_step, model.loss, model.train_op], feed_dict=feed_dict)
 
-                    print('%d iteration, %d valid acc: %f' % (step, ))
-
-
-
+                    print('%d iteration, %d valid acc: %f' % (step, global_step, batch_loss))
 
 
 def Model_export():
@@ -114,7 +114,4 @@ def Model_export():
 
 def Model_load():
     return
-
-
-
 

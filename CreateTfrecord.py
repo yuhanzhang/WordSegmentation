@@ -1,25 +1,28 @@
 import tensorflow as tf
-import pickle
 import os
 import json
 from DataUtils import load_map_file
+import GlobalParameter
 
 
 def seg2tfrecords(text_file, map_file, columns=[0, 1]):
     filename = os.path.basename(text_file).split('.')[0]
     out_filename = os.path.join('data/', filename+'.tfrecord')
-    vocabulary, tag2id, id2tag = load_map_file(map_file)
+    word2id, tag2id, id2tag = load_map_file(map_file)
     writer = tf.python_io.TFRecordWriter(out_filename)
 
     num_sample = 0
     all_oov = 0
     total_word = 0
-    with open(text_file) as f:
+    with open(text_file, 'r', encoding='utf-8') as f:
         sentence = []
-        for line in enumerate(f):
+        for _, line in enumerate(f):
             line = line.strip('\n')
             if not line:
                 # 一个句子输入完毕
+                word_count, oov_count = create_example(writer, sentence, word2id, tag2id)
+                total_word += word_count
+                all_oov += oov_count
                 num_sample += 1
                 sentence.clear()
                 continue
@@ -30,7 +33,15 @@ def seg2tfrecords(text_file, map_file, columns=[0, 1]):
     return num_sample
 
 
-def create_example(writer, sentence, word2id, tag2id, max_length):
+def create_example(writer, sentence, word2id, tag2id):
+    """
+    对一个句子转化
+    :param writer:
+    :param sentence:
+    :param word2id:
+    :param tag2id:
+    :return:
+    """
     word_list = []
     tag_list = []
     oov_count = 0
@@ -47,7 +58,7 @@ def create_example(writer, sentence, word2id, tag2id, max_length):
         tag_list.append(tag2id[label])
 
     example = tf.train.SequenceExample()
-    sentence_len = max_length if len(sentence) > max_length else len(sentence)
+    sentence_len =  GlobalParameter.MAX_LENGTH if len(sentence) >  GlobalParameter.MAX_LENGTH else len(sentence)
     fl_tags = example.feature_lists.feature_list['tags']
     for l in tag_list[:sentence_len]:
         fl_tags.feature.add().int64_list.value.append(l)
@@ -56,6 +67,19 @@ def create_example(writer, sentence, word2id, tag2id, max_length):
         fl_words.feature.add().int64_list.value.append(l)
     fl_length = example.feature_lists.feature_list['length']
     fl_length.feature.add().int64_list.value.append(sentence_len)
-
     writer.write(example.SerializeToString())
     return word_count, oov_count
+
+
+def create_tfrecords():
+    train_num = seg2tfrecords(GlobalParameter.TRAIN_FILE, GlobalParameter.MAP_FILE)
+    valid_num = seg2tfrecords(GlobalParameter.VALID_FILE, GlobalParameter.MAP_FILE)
+    # test_num = seg2tfrecords(GlobalParameter.TEST_FILE, GlobalParameter.MAP_FILE)
+    with open(GlobalParameter.SIZE_FILE, 'r') as f:
+        size_obj = json.load(f)
+
+    with open(os.path.join(GlobalParameter.SIZE_FILE), 'w') as f:
+        size_obj['train_num'] = train_num
+        size_obj['valid_num'] = valid_num
+        # size_obj['test_num'] = test_num
+        json.dump(size_obj, f)
