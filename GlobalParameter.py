@@ -2,6 +2,8 @@
 RAW_CORPUS = 'E:\\chinese word segmentation\\corpus\\PeopleDaily2014'
 RAW_DATA_DIR = 'raw_data'
 WORD2VEC_DIR = 'word2vec'
+MODEL_DIR = './model'
+CHECKPOINT_DIR = './checkpoint'
 WORD2VEC_FILE = WORD2VEC_DIR + '/word_embedding_300dim.txt'
 TRAIN_FILE = 'data/train.txt'
 VALID_FILE = 'data/valid.txt'

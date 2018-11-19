@@ -8,9 +8,6 @@ import tensorflow as tf
 
 
 class BatchManager:
-    """
-    划分batch数据，进行填充以及排序
-    """
     def __init__(self, data, batch_size):
         batch_num = int(math.ceil(len(data) / batch_size))
         sorted_data = sorted(data, key=lambda x: len(x[0]))
@@ -52,15 +49,15 @@ class SegBatcher:
         key, record_string = reader.read(filename_queue)
 
         features = {
-            'labels': tf.FixedLenSequenceFeature([], tf.int64),
-            'word_list': tf.FixedLenSequenceFeature([], tf.int64),
-            'sent_len': tf.FixedLenSequenceFeature([], tf.int64),
+            'tags': tf.FixedLenSequenceFeature([], tf.int64),
+            'words': tf.FixedLenSequenceFeature([], tf.int64),
+            'length': tf.FixedLenSequenceFeature([], tf.int64),
         }
 
-        _, example = tf.parse_single_example(serialized=record_string, sequence_features=features)
-        labels = example['labels']
-        word_list = example['word_list']
-        sent_len = example['sent_len']
+        _, example = tf.parse_single_sequence_example(serialized=record_string, sequence_features=features)
+        labels = example['tags']
+        word_list = example['words']
+        sent_len = example['length']
         return labels, word_list, sent_len
 
     def input_pipeline(self, filenames, batch_size, epochs_num=None):
@@ -76,7 +73,6 @@ class SegBatcher:
 
 def load_size_file(size_file):
     with open(size_file, 'r') as f:
-        print(size_file)
         num_obj = json.load(f)
         return num_obj
 

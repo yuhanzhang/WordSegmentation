@@ -1,27 +1,19 @@
 import numpy as np
 import gensim
-from gensim.models import word2vec
-from gensim.models.word2vec import LineSentence
 import GlobalParameter
+
 
 class Word2vec:
     def __init__(self):
         self.word2vec = {}
 
-    def load_word2vec(self, pre_word2vec, id2word, is_binary=False):
-        """
-        载入预训练的词向量，得到语料库中词语的词向量
-        :param pre_word2vec: 预训练的词向量
-        :param id2word:
-        :param is_binary:
-        :return: 语料库中词语的词向量
-        """
+    def load_word2vec(self, word2vec_file, id2word, is_binary=False):
         if not is_binary:
-            f = open(pre_word2vec, errors='ignore')
+            f = open(word2vec_file, encoding='utf-8')
             m, n = f.readline().split()
             word_size = int(n)
 
-            for line in enumerate(f):
+            for _, line in enumerate(f):
                 line = line.strip('\n').strip().split()
                 word = line[0]
                 vector = [float(v) for v in line[1:]]

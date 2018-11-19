@@ -16,9 +16,8 @@ class BiLSTM:
         self.learning_rate = config['learning_rate']
 
         self.word_embedding = tf.get_variable(name='word_embedding', initializer=embeddings)
-        '''通过输入和输出神经元的数目自动确定权值矩阵的初始化大小'''
         self.initializer = initializers.xavier_initializer()
-        self.g_step = tf.Variable(0, trainable=False)
+        self.global_step = tf.Variable(0, trainable=False)
 
         self.inputs = tf.placeholder(dtype=tf.int32, shape=[None, None], name='inputs')
         self.label = tf.placeholder(dtype=tf.int32, shape=[None, None], name='label')
@@ -29,7 +28,7 @@ class BiLSTM:
         self.steps_num = tf.shape(self.inputs)[-1]
 
         self.input_dropout_keep_prob = tf.placeholder_with_default(config['input_dropout_keep'], [],
-                                                                   name='input_dropout keep_prob')
+                                                                   name='input_dropout_keep_prob')
         # forward propagation
         embedding_output = self.__embedding_layer(self.inputs)
         lstm_input = tf.nn.dropout(embedding_output, self.input_dropout_keep_prob)
@@ -42,7 +41,7 @@ class BiLSTM:
 
     def __embedding_layer(self, layer_inputs):
         with tf.variable_scope('embedding'):
-            layer_output = tf.nn.embedding_lookup(self.embedding, layer_inputs)
+            layer_output = tf.nn.embedding_lookup(self.word_embedding, layer_inputs)
         return layer_output
 
     def __bilstm_layer(self, layer_inputs, name=None):
@@ -102,7 +101,7 @@ class BiLSTM:
             grads_vars = self.opt.compute_gradients(self.loss)
             capped_grads_vars = [[tf.clip_by_value(g, -self.config['clip'], self.config['clip']), v] for g, v in
                                  grads_vars]
-            self.train_op = self.opt.apply_gradients(capped_grads_vars, self.g_step)
+            self.train_op = self.opt.apply_gradients(capped_grads_vars, self.global_step)
 
 
 

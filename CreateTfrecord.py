@@ -34,14 +34,7 @@ def seg2tfrecords(text_file, map_file, columns=[0, 1]):
 
 
 def create_example(writer, sentence, word2id, tag2id):
-    """
-    对一个句子转化
-    :param writer:
-    :param sentence:
-    :param word2id:
-    :param tag2id:
-    :return:
-    """
+
     word_list = []
     tag_list = []
     oov_count = 0
@@ -58,7 +51,7 @@ def create_example(writer, sentence, word2id, tag2id):
         tag_list.append(tag2id[label])
 
     example = tf.train.SequenceExample()
-    sentence_len =  GlobalParameter.MAX_LENGTH if len(sentence) >  GlobalParameter.MAX_LENGTH else len(sentence)
+    sentence_len = GlobalParameter.MAX_LENGTH if len(sentence) > GlobalParameter.MAX_LENGTH else len(tag_list)
     fl_tags = example.feature_lists.feature_list['tags']
     for l in tag_list[:sentence_len]:
         fl_tags.feature.add().int64_list.value.append(l)
@@ -66,7 +59,8 @@ def create_example(writer, sentence, word2id, tag2id):
     for l in word_list[:sentence_len]:
         fl_words.feature.add().int64_list.value.append(l)
     fl_length = example.feature_lists.feature_list['length']
-    fl_length.feature.add().int64_list.value.append(sentence_len)
+    for l in [sentence_len]:
+        fl_length.feature.add().int64_list.value.append(l)
     writer.write(example.SerializeToString())
     return word_count, oov_count
 

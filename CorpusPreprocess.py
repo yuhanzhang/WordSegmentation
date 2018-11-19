@@ -3,7 +3,6 @@ import os
 
 
 class Preprocessor:
-    """语料预处理"""
     def __init__(self, filename):
         self.filename = filename
 
@@ -21,7 +20,6 @@ class Preprocessor:
                 sentence = line[last_index:sentence_index.end()+2]
                 last_index = sentence_index.end() + 3                # print('origin line: ', line)
                 p = '\[(?P<phrase>[^/][^\[\]]+?)\]/\w+? '
-                # 将匹配的"[...]/.."替换成[]内的内容
                 sentence = re.sub(p, self.__onlyPhrase, sentence)
                 tokens = sentence.split()
                 for token in tokens:
@@ -45,11 +43,6 @@ class Preprocessor:
 
 
 def gci(path):
-    """
-    递归遍历文件夹中的所有文件
-    :param path: path of the folder
-    :return:
-    """
     parents = os.listdir(path)
     for parent in parents:
         child = os.path.join(path, parent)
@@ -62,11 +55,6 @@ def gci(path):
 
 
 def create_data(rawdata_dir):
-    """
-    将语料分割成train, valid, test
-    :param rawdata_dir:原始语料文件夹路径
-    :return:
-    """
     parents = os.listdir(rawdata_dir)
     all_data = []
     for parent in parents:
