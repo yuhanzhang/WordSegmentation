@@ -170,7 +170,7 @@ def Model_train():
                     }
                     global_step, batch_loss, _ = sess.run([model.global_step, model.loss, model.train_op], feed_dict=feed_dict)
 
-                    print('%d iteration, %d valid loss: %f' % (step, global_step, batch_loss))
+                    print('%d iteration %d loss: %f' % (step, global_step, batch_loss))
                     if global_step % GlobalParameter.eval_step == 0:
                         acc = evaluation(valid_batches)
                         print("%d iteration , %d dev acc: %f " % (step, global_step, acc))
@@ -198,4 +198,3 @@ def Model_export():
 
 def Model_load():
     return
-
