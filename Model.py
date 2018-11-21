@@ -186,15 +186,25 @@ def Model_train():
                     loss.append(batch_loss)
                     examples += batch_size
             sv.saver.save(sess, GlobalParameter.CHECKPOINT_DIR+'/model', global_step=global_step)
-            # test()
         sv.coord.request_stop()
         sv.coord.join(threads)
         sess.close()
 
 
-def Model_export():
-    return
-
-
-def Model_load():
+def Model_export(checkpoints_path, out_model_path, out_put_names):
+    graph = tf.Graph()
+    checkpoints_file = tf.train.latest_checkpoint(checkpoints_path)
+    print(checkpoints_path)
+    with graph.as_default():
+        session_conf = tf.ConfigProto(
+            allow_soft_placement=True,
+            log_device_placement=True
+        )
+        sess = tf.Session(config=session_conf)
+        saver = tf.train.import_meta_graph('{}.meta'.format(checkpoints_file))
+        saver.restore(sess, checkpoints_file)
+        output_graph_def = tf.graph_util.convert_variables_to_constants(sess, tf.get_default_graph().as_graph_def(),
+                                                                       output_node_names=out_put_names)
+        with tf.gfile.FastGFile(out_model_path, mode='wb') as f:
+            f.write(output_graph_def.SerializeToString())
     return

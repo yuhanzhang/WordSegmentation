@@ -70,7 +70,7 @@ class BiLSTM:
                                         initializer=self.initializer, regularizer=l2_regularizer(0.001))
                 b_out = tf.get_variable(name='b_out', shape=[self.tags_num], initializer=tf.zeros_initializer())
                 predict = tf.nn.xw_plus_b(drop_hidden, weights=w_out, biases=b_out, name='predict')
-                self.logits = tf.reshape(predict, [-1, self.steps_num, self.tags_num], name='logits')
+            self.logits = tf.reshape(predict, [-1, self.steps_num, self.tags_num], name='logits')
 
     def __loss_layer(self, layer_input, length, name=None):
         with tf.variable_scope('loss' if not name else name):
